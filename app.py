@@ -285,22 +285,34 @@ with chat_container:
             else:
                 st.markdown(f'<div class="bot-message">{message["content"]}</div>', unsafe_allow_html=True)
 
+# Check for unprocessed user messages (from buttons or chat input)
+should_process_response = False
+latest_user_message = None
+
+# Check if last message is a user message without a corresponding AI response
+if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
+    should_process_response = True
+    latest_user_message = st.session_state.messages[-1]["content"]
+
 # Chat input
 user_input = st.chat_input("Ask me anything about Andhra Pradesh tourism...")
 
 if user_input:
     # Add user message
     st.session_state.messages.append({"role": "user", "content": user_input})
-    
+    should_process_response = True
+    latest_user_message = user_input
+
+if should_process_response and latest_user_message:
     with st.spinner("Thinking..."):
         try:
             # Check if user wants an itinerary
             keywords = ["itinerary", "plan", "trip", "schedule", "यात्रा कार्यक्रम", "योजना", "ప్రయాణ కార్యక్రమం", "ప్రణాళిక"]
-            is_itinerary_request = any(keyword.lower() in user_input.lower() for keyword in keywords)
+            is_itinerary_request = any(keyword.lower() in latest_user_message.lower() for keyword in keywords)
             
             if is_itinerary_request:
                 # Generate itinerary in English first
-                itinerary = itinerary_generator.generate_itinerary(user_input, "English")
+                itinerary = itinerary_generator.generate_itinerary(latest_user_message, "English")
                 # Then translate if needed
                 if st.session_state.language != "English":
                     itinerary = translator.translate_text(itinerary, "English", st.session_state.language)
@@ -313,7 +325,7 @@ if user_input:
                 })
             else:
                 # Regular chat response in English first
-                response = gemini_client.get_tourism_response(user_input, "English")
+                response = gemini_client.get_tourism_response(latest_user_message, "English")
                 # Then translate if needed
                 if st.session_state.language != "English":
                     response = translator.translate_text(response, "English", st.session_state.language)
