@@ -8,8 +8,7 @@ from utils.itinerary_generator import ItineraryGenerator
 st.set_page_config(
     page_title="Saanchari - Your Travel Companion",
     page_icon="🗺️",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+    layout="wide"
 )
 
 # Custom CSS for brand styling
@@ -149,9 +148,9 @@ with col2:
 # Welcome message
 if not st.session_state.messages:
     welcome_msg = {
-        "English": "🙏 Welcome to Saanchari! I'm your travel companion for exploring Anand and Gujarat. Ask me about places to visit, local culture, food recommendations, or say 'itinerary' or 'plan' to get a detailed travel plan!",
-        "Hindi": "🙏 सांचारी में आपका स्वागत है! मैं आनंद और गुजरात की खोज के लिए आपका यात्रा साथी हूं। घूमने की जगहों, स्थानीय संस्कृति, खाने की सिफारिशों के बारे में पूछें, या विस्तृत यात्रा योजना के लिए 'यात्रा कार्यक्रम' या 'योजना' कहें!",
-        "Telugu": "🙏 సాంచారికి స్వాగతం! ఆనంద్ మరియు గుజరాత్ అన్వేషణకు నేను మీ ప్రయాణ సహచరుడిని. సందర్శించవలసిన ప్రదేశాలు, స్థానిక సంస్కృతి, ఆహార సిఫార్సుల గురించి అడగండి, లేదా వివరణాత్మక ప్రయాణ ప్రణాళిక కోసం 'ప్రయాణ కార్యక్రమం' లేదా 'ప్రణాళిక' అని చెప్పండి!"
+        "English": "🙏 Welcome to Saanchari! I'm your travel companion for exploring Andhra Pradesh. Ask me about places to visit, local culture, food recommendations, or say 'itinerary' or 'plan' to get a detailed travel plan!",
+        "Hindi": "🙏 सांचारी में आपका स्वागत है! मैं आंध्र प्रदेश की खोज के लिए आपका यात्रा साथी हूं। घूमने की जगहों, स्थानीय संस्कृति, खाने की सिफारिशों के बारे में पूछें, या विस्तृत यात्रा योजना के लिए 'यात्रा कार्यक्रम' या 'योजना' कहें!",
+        "Telugu": "🙏 సాంచారికి స్వాగతం! ఆంధ్ర ప్రదేశ్ అన్వేషణకు నేను మీ ప్రయాణ సహచరుడిని. సందర్శించవలసిన ప్రదేశాలు, స్థానిక సంస్కృతి, ఆహార సిఫార్సుల గురించి అడగండి, లేదా వివరణాత్మక ప్రయాణ ప్రణాళిక కోసం 'ప్రయాణ కార్యక్రమం' లేదా 'ప్రణాళిక' అని చెప్పండి!"
     }
     st.session_state.messages.append({
         "role": "assistant",
@@ -161,6 +160,32 @@ if not st.session_state.messages:
 
 # Chat interface
 st.markdown("### Chat with Saanchari")
+
+# Quick action buttons
+quick_actions = {
+    "English": ["🏛️ Famous Temples", "🏖️ Beach Destinations", "📋 Plan My Trip"],
+    "Hindi": ["🏛️ प्रसिद्ध मंदिर", "🏖️ समुद्री तट", "📋 मेरी यात्रा की योजना"],
+    "Telugu": ["🏛️ ప్రసిద్ధ దేవాలయాలు", "🏖️ సముద్ర తీరాలు", "📋 నా ప్రయాణ ప్రణాళిక"]
+}
+
+col1, col2, col3 = st.columns(3)
+with col1:
+    if st.button(quick_actions[st.session_state.language][0], key="temples"):
+        user_input = "Tell me about famous temples in Andhra Pradesh"
+        st.session_state.messages.append({"role": "user", "content": user_input})
+        st.rerun()
+        
+with col2:
+    if st.button(quick_actions[st.session_state.language][1], key="beaches"):
+        user_input = "Show me beautiful beach destinations in Andhra Pradesh"
+        st.session_state.messages.append({"role": "user", "content": user_input})
+        st.rerun()
+        
+with col3:
+    if st.button(quick_actions[st.session_state.language][2], key="plan"):
+        user_input = "Create a 3-day itinerary for Andhra Pradesh"
+        st.session_state.messages.append({"role": "user", "content": user_input})
+        st.rerun()
 
 # Display chat messages
 chat_container = st.container()
@@ -175,7 +200,7 @@ with chat_container:
                 st.markdown(f'<div class="bot-message">{message["content"]}</div>', unsafe_allow_html=True)
 
 # Chat input
-user_input = st.chat_input("Ask me anything about Anand tourism...")
+user_input = st.chat_input("Ask me anything about Andhra Pradesh tourism...")
 
 if user_input:
     # Add user message
@@ -188,8 +213,9 @@ if user_input:
             is_itinerary_request = any(keyword.lower() in user_input.lower() for keyword in keywords)
             
             if is_itinerary_request:
-                # Generate itinerary
-                itinerary = itinerary_generator.generate_itinerary(user_input, st.session_state.language)
+                # Generate itinerary in English first
+                itinerary = itinerary_generator.generate_itinerary(user_input, "English")
+                # Then translate if needed
                 if st.session_state.language != "English":
                     itinerary = translator.translate_text(itinerary, "English", st.session_state.language)
                 
@@ -200,8 +226,9 @@ if user_input:
                     "original_content": itinerary
                 })
             else:
-                # Regular chat response
-                response = gemini_client.get_tourism_response(user_input, st.session_state.language)
+                # Regular chat response in English first
+                response = gemini_client.get_tourism_response(user_input, "English")
+                # Then translate if needed
                 if st.session_state.language != "English":
                     response = translator.translate_text(response, "English", st.session_state.language)
                 
@@ -212,56 +239,28 @@ if user_input:
                 })
                 
         except Exception as e:
-            error_msg = {
-                "English": f"I apologize, but I'm having technical difficulties. Please try again. Error: {str(e)}",
-                "Hindi": f"मुझे खुशी है, लेकिन मुझे तकनीकी कठिनाइयों का सामना कर रहा हूं। कृपया पुनः प्रयास करें। त्रुटि: {str(e)}",
-                "Telugu": f"క్షమించండి, నాకు సాంకేతిక ఇబ్బందులు ఉన్నాయి. దయచేసి మళ్లీ ప్రయత్నించండి. లోపం: {str(e)}"
-            }
+            error_msg = f"I apologize, but I'm having technical difficulties. Please try again. Error: {str(e)}"
+            # Translate error message if needed
+            if st.session_state.language != "English":
+                error_msg = translator.translate_text(error_msg, "English", st.session_state.language)
+            
             st.session_state.messages.append({
                 "role": "assistant",
-                "content": error_msg[st.session_state.language],
-                "original_content": error_msg["English"]
+                "content": error_msg,
+                "original_content": error_msg
             })
     
     st.rerun()
 
-# Sidebar with additional information
-with st.sidebar:
-    st.markdown("### About Saanchari")
-    st.markdown("""
-    🗺️ **Saanchari** is your intelligent travel companion for exploring Anand, Gujarat.
-    
-    **Features:**
-    - 💬 Tourism information and recommendations
-    - 🗺️ Intelligent itinerary generation
-    - 🌐 Multi-language support (English, Hindi, Telugu)
-    - 🏛️ Local culture and heritage insights
-    - 🍽️ Food and accommodation suggestions
-    
-    **How to use:**
-    - Ask questions about places to visit
-    - Request local recommendations
-    - Say "itinerary" or "plan" for detailed travel plans
-    - Switch languages anytime using the selector
-    """)
-    
-    st.markdown("### Quick Tips")
-    st.markdown("""
-    - Try: "Show me famous temples in Anand"
-    - Try: "Plan a 3-day itinerary for Anand"
-    - Try: "Best local food in Anand"
-    - Try: "Cultural festivals in Gujarat"
-    """)
-    
-    if st.button("Clear Chat History"):
-        st.session_state.messages = []
-        st.rerun()
+# Clear chat button
+if st.button("🗑️ Clear Chat History"):
+    st.session_state.messages = []
+    st.rerun()
 
 # Footer
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #07546B; padding: 1rem;'>
-    Made with ❤️ for travelers exploring Anand, Gujarat<br>
-    <small>Powered by Google Gemini AI</small>
+    <small>Rocket Growth Technologies</small>
 </div>
 """, unsafe_allow_html=True)

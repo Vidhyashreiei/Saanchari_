@@ -24,12 +24,12 @@ class ItineraryGenerator:
             
             # Create detailed prompt for itinerary generation
             itinerary_prompt = f"""
-            Create a detailed {duration}-day travel itinerary for Anand, Gujarat based on this request: "{user_request}"
+            Create a detailed {duration}-day travel itinerary for Andhra Pradesh based on this request: "{user_request}"
             
             REQUIREMENTS:
-            - Focus primarily on Anand and nearby attractions within 50km
+            - Focus primarily on major cities and attractions in Andhra Pradesh
             - Include practical details: timings, approximate costs, transportation
-            - Mix of cultural, historical, spiritual, and local experience
+            - Mix of cultural, historical, spiritual, and local experiences
             - Include local food recommendations for each day
             - Suggest authentic local experiences
             - Consider travel time between locations
@@ -44,15 +44,15 @@ class ItineraryGenerator:
             - Use bullet points with • for activities
             
             SAMPLE STRUCTURE:
-            <h3>🗓️ Day 1: Arrival & Anand Exploration</h3>
+            <h3>🗓️ Day 1: Arrival & Visakhapatnam Exploration</h3>
             <div class="day-item">
             <strong>9:00 AM</strong> - Arrival and hotel check-in<br>
-            <strong>10:30 AM</strong> - Visit Amul Dairy Museum 🥛<br>
-            • Learn about the White Revolution<br>
-            • Entry fee: ₹20 per person<br>
-            <strong>12:30 PM</strong> - Lunch at local Gujarati restaurant<br>
-            • Try: Dhokla, Thepla, Gujarati Thali<br>
-            <strong>2:00 PM</strong> - ISKCON Temple visit 🏛️<br>
+            <strong>10:30 AM</strong> - Visit Kailasagiri Hill Park 🏔️<br>
+            • Enjoy panoramic views of the city<br>
+            • Entry fee: ₹30 per person<br>
+            <strong>12:30 PM</strong> - Lunch at local Andhra restaurant<br>
+            • Try: Biryani, Pulihora, Andhra meals<br>
+            <strong>2:00 PM</strong> - RK Beach visit 🏖️<br>
             <strong>Evening</strong> - Local market exploration<br>
             </div>
             
@@ -67,14 +67,14 @@ class ItineraryGenerator:
                 response = self._format_as_html(response)
             
             return f"""
-            <h2>🗺️ Your Personalized Anand Travel Itinerary</h2>
-            <p style="margin-bottom: 1rem;"><em>Crafted specially for your journey to the Milk Capital of India!</em></p>
+            <h2>🗺️ Your Personalized Andhra Pradesh Travel Itinerary</h2>
+            <p style="margin-bottom: 1rem;"><em>Crafted specially for your journey to the land of rich heritage and culture!</em></p>
             {response}
             <hr style="margin: 1rem 0;">
             <p><strong>💡 Pro Tips:</strong></p>
             <p>• Best time to visit: October to March<br>
             • Carry comfortable walking shoes<br>
-            • Try local Gujarati thali at authentic restaurants<br>
+            • Try local Andhra meals at authentic restaurants<br>
             • Book accommodations in advance during festival seasons<br>
             • Respect local customs and traditions</p>
             """

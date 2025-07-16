@@ -1,8 +1,8 @@
-# Saanchari - Tourism Chatbot for Anand, Gujarat
+# Saanchari - Tourism Chatbot for Andhra Pradesh
 
 ## Overview
 
-Saanchari is a sophisticated tourism chatbot built with Streamlit that serves as a digital travel companion for visitors to Anand, Gujarat, India. The application leverages Google Gemini AI to provide intelligent, contextual responses about local tourism, attractions, and cultural experiences. The system is designed with a focus on local expertise, multi-language support, and intelligent itinerary generation capabilities.
+Saanchari is a sophisticated tourism chatbot built with Streamlit that serves as a digital travel companion for visitors to Andhra Pradesh, India. The application leverages Google Gemini AI to provide intelligent, contextual responses about local tourism, attractions, and cultural experiences. The system is designed with a focus on local expertise, multi-language support, intelligent itinerary generation capabilities, and quick action buttons for enhanced user experience.
 
 ## User Preferences
 
@@ -29,13 +29,13 @@ The architecture prioritizes maintainability, scalability, and ease of deploymen
 
 ### Gemini Client (`utils/gemini_client.py`)
 - **AI Integration**: Manages communication with Google Gemini 2.5 Flash model
-- **Tourism-Specific Prompting**: Specialized system prompt focused on Anand and Gujarat tourism
+- **Tourism-Specific Prompting**: Specialized system prompt focused on Andhra Pradesh tourism
 - **Knowledge Base**: Pre-configured with local attractions, cultural information, and practical details
 - **Error Handling**: Robust exception management for API interactions
 
 ### Translation Service (`utils/translator.py`)
 - **Multi-Language Support**: Handles English, Hindi, and Telugu translations
-- **Google Translate Integration**: Real-time translation capabilities
+- **Deep Translator Integration**: Real-time translation capabilities using deep-translator library
 - **Language Code Mapping**: Efficient language identification and conversion
 - **Fallback Mechanisms**: Graceful degradation when translation fails
 
@@ -43,14 +43,14 @@ The architecture prioritizes maintainability, scalability, and ease of deploymen
 - **Smart Itinerary Creation**: Keyword-triggered, AI-powered travel planning
 - **Duration Extraction**: Intelligent parsing of travel duration from user requests
 - **Structured Output**: HTML-formatted itineraries with proper styling
-- **Local Focus**: Emphasis on Anand and nearby attractions within practical travel distances
+- **Local Focus**: Emphasis on Andhra Pradesh and major attractions within the state
 
 ## Data Flow
 
 1. **User Input**: Users interact through Streamlit chat interface
 2. **Language Processing**: Input is processed and potentially translated to English
 3. **AI Query**: Processed query sent to Gemini AI with tourism-specific context
-4. **Response Generation**: AI generates contextual response about Anand/Gujarat tourism
+4. **Response Generation**: AI generates contextual response about Andhra Pradesh tourism
 5. **Itinerary Detection**: System checks for itinerary-related keywords
 6. **Specialized Processing**: If itinerary requested, dedicated generator creates detailed plans
 7. **Translation**: Response translated to user's preferred language
