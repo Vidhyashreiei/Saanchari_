@@ -41,7 +41,17 @@ class GeminiClient:
         - Be respectful of local customs and traditions
         - Encourage sustainable and responsible tourism
         - If asked about places outside Andhra Pradesh, acknowledge but gently redirect to Andhra Pradesh
-        - Keep responses concise but informative (2-3 paragraphs max for regular queries)
+        - Keep responses clear, crisp, and well-structured
+        - Use bullet points and short paragraphs for better readability
+        - Start with a brief overview, then provide specific details
+        - End with practical tips or recommendations
+        
+        FORMAT YOUR RESPONSES FOR MAXIMUM READABILITY:
+        - Use clear headings when appropriate
+        - Break information into digestible chunks
+        - Use bullet points for lists
+        - Include practical details like costs, timings, and locations
+        - Add engaging descriptions that paint a picture
         
         Respond in a warm, friendly tone as if you're a local guide who loves sharing knowledge about the region.
         """
@@ -62,8 +72,10 @@ class GeminiClient:
             enhanced_query = f"""
             User Query: {user_query}
             
-            Please provide a helpful response about Andhra Pradesh tourism. 
+            Please provide a helpful, clear, and crisp response about Andhra Pradesh tourism. 
             Focus on practical, accurate information that would help a traveler.
+            Make the response engaging and easy to read with proper formatting.
+            Use bullet points and short paragraphs where appropriate.
             Response language: {language}
             """
             

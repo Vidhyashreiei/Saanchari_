@@ -50,47 +50,133 @@ st.markdown("""
     }
     
     .chat-container {
-        max-height: 500px;
+        max-height: 600px;
         overflow-y: auto;
-        padding: 1rem;
-        border: 1px solid #CFD1D1;
-        border-radius: 10px;
-        background-color: #FAFAFA;
+        padding: 1.5rem;
+        border: 2px solid #CFD1D1;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #FAFAFA 0%, #F8F9FA 100%);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     
     .user-message {
-        background-color: #F75768;
+        background: linear-gradient(135deg, #F75768 0%, #FB6957 100%);
         color: white;
-        padding: 0.8rem;
-        border-radius: 10px;
-        margin: 0.5rem 0;
-        margin-left: 20%;
+        padding: 1rem 1.2rem;
+        border-radius: 20px 20px 5px 20px;
+        margin: 1rem 0;
+        margin-left: 25%;
         text-align: right;
+        box-shadow: 0 2px 4px rgba(247, 87, 104, 0.3);
+        font-size: 1rem;
+        line-height: 1.6;
     }
     
     .bot-message {
-        background-color: #07546B;
+        background: linear-gradient(135deg, #07546B 0%, #0A6B7D 100%);
         color: white;
-        padding: 0.8rem;
-        border-radius: 10px;
+        padding: 1.2rem 1.5rem;
+        border-radius: 20px 20px 20px 5px;
+        margin: 1rem 0;
+        margin-right: 25%;
+        box-shadow: 0 2px 4px rgba(7, 84, 107, 0.3);
+        font-size: 1rem;
+        line-height: 1.7;
+    }
+    
+    .bot-message h3 {
+        color: #FB6957;
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .bot-message p {
+        margin-bottom: 0.8rem;
+    }
+    
+    .bot-message ul, .bot-message ol {
         margin: 0.5rem 0;
-        margin-right: 20%;
+        padding-left: 1.5rem;
+    }
+    
+    .bot-message li {
+        margin: 0.3rem 0;
     }
     
     .itinerary-container {
-        background-color: #FB6957;
+        background: linear-gradient(135deg, #FB6957 0%, #F75768 100%);
         color: white;
-        padding: 1.5rem;
-        border-radius: 10px;
+        padding: 2rem;
+        border-radius: 20px 20px 20px 5px;
         margin: 1rem 0;
+        margin-right: 25%;
+        box-shadow: 0 4px 8px rgba(251, 105, 87, 0.3);
+        font-size: 1rem;
+        line-height: 1.7;
     }
     
     .day-item {
-        background-color: rgba(255, 255, 255, 0.1);
-        padding: 1rem;
-        border-radius: 8px;
-        margin: 0.5rem 0;
-        border-left: 4px solid #F75768;
+        background-color: rgba(255, 255, 255, 0.15);
+        padding: 1.2rem;
+        border-radius: 12px;
+        margin: 0.8rem 0;
+        border-left: 5px solid #F75768;
+        backdrop-filter: blur(5px);
+    }
+    
+    .quick-action-btn {
+        background: linear-gradient(135deg, #07546B 0%, #0A6B7D 100%);
+        color: white;
+        border: none;
+        padding: 0.8rem 1.2rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(7, 84, 107, 0.3);
+        width: 100%;
+        margin: 0.2rem 0;
+    }
+    
+    .quick-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(7, 84, 107, 0.4);
+        background: linear-gradient(135deg, #0A6B7D 0%, #07546B 100%);
+    }
+    
+    .chat-input-container {
+        background: white;
+        border-radius: 25px;
+        padding: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 2px solid #CFD1D1;
+    }
+    
+    .stButton button {
+        background: linear-gradient(135deg, #07546B 0%, #0A6B7D 100%);
+        color: white;
+        border: none;
+        padding: 0.8rem 1.2rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(7, 84, 107, 0.3);
+        width: 100%;
+        margin: 0.2rem 0;
+    }
+    
+    .stButton button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(7, 84, 107, 0.4);
+        background: linear-gradient(135deg, #0A6B7D 0%, #07546B 100%);
+    }
+    
+    .stButton button:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(7, 84, 107, 0.3);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -252,15 +338,10 @@ if user_input:
     
     st.rerun()
 
-# Clear chat button
-if st.button("🗑️ Clear Chat History"):
-    st.session_state.messages = []
-    st.rerun()
-
-# Footer
-st.markdown("---")
+# Add sticky footer at the bottom
 st.markdown("""
-<div style='text-align: center; color: #07546B; padding: 1rem;'>
-    <small>Rocket Growth Technologies</small>
+<div style='position: fixed; bottom: 0; left: 0; right: 0; background-color: #FFFFFF; 
+            border-top: 1px solid #CFD1D1; padding: 0.5rem; text-align: center; z-index: 999;'>
+    <small style='color: #07546B;'>Rocket Growth Technologies</small>
 </div>
 """, unsafe_allow_html=True)
