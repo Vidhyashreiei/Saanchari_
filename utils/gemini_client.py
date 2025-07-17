@@ -11,7 +11,7 @@ class GeminiClient:
             raise ValueError("GEMINI_API_KEY environment variable is required")
         
         self.client = genai.Client(api_key=api_key)
-        self.model = "gemini-2.5-flash"
+        self.model = "gemini-1.5-pro"
     
     def get_tourism_response(self, user_query: str, language: str = "English") -> str:
         """

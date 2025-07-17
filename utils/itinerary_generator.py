@@ -3,9 +3,14 @@ from typing import Dict, List
 from .gemini_client import GeminiClient
 
 class ItineraryGenerator:
-    def __init__(self, gemini_client: GeminiClient):
-        """Initialize itinerary generator with Gemini client."""
-        self.gemini_client = gemini_client
+    def __init__(self, gemini_client=None):
+        """
+        Initialize itinerary generator.
+        
+        Args:
+            gemini_client: Optional GeminiClient instance. If not provided, a new one will be created.
+        """
+        self.gemini_client = gemini_client if gemini_client is not None else GeminiClient()
     
     def generate_itinerary(self, user_request: str, language: str = "English") -> str:
         """
@@ -60,16 +65,17 @@ class ItineraryGenerator:
             Language: {language}
             """
             
-            response = self.gemini_client.generate_structured_response(itinerary_prompt)
+            # Generate itinerary using Gemini
+            itinerary_html = self.gemini_client.get_tourism_response(itinerary_prompt, "English")
             
-            # If response doesn't contain HTML formatting, format it
-            if not self._is_html_formatted(response):
-                response = self._format_as_html(response)
+            # Translate to target language if needed
+            if language != "English":
+                itinerary_html = translation_service.translate_text(itinerary_html, language)
             
             return f"""
             <h2>🗺️ Your Personalized Andhra Pradesh Travel Itinerary</h2>
             <p style="margin-bottom: 1rem;"><em>Crafted specially for your journey to the land of rich heritage and culture!</em></p>
-            {response}
+            {itinerary_html}
             <hr style="margin: 1rem 0;">
             <p><strong>💡 Pro Tips:</strong></p>
             <p>• Best time to visit: October to March<br>
@@ -118,6 +124,29 @@ class ItineraryGenerator:
         """Check if text contains HTML formatting."""
         html_tags = ['<h3>', '<div>', '<strong>', '<br>', '<p>']
         return any(tag in text for tag in html_tags)
+    
+    def _split_into_chunks(self, text: str, max_length: int = 3000) -> list:
+        """Split text into chunks of maximum length, trying to split at sentence boundaries."""
+        if len(text) <= max_length:
+            return [text]
+            
+        # Try to split at sentence boundaries
+        sentences = re.split(r'(?<=[.!?])\s+', text)
+        chunks = []
+        current_chunk = ""
+        
+        for sentence in sentences:
+            if len(current_chunk) + len(sentence) + 1 <= max_length:
+                current_chunk += (sentence + " ")
+            else:
+                if current_chunk:
+                    chunks.append(current_chunk.strip())
+                current_chunk = sentence + " "
+        
+        if current_chunk:
+            chunks.append(current_chunk.strip())
+            
+        return chunks
     
     def _format_as_html(self, text: str) -> str:
         """Convert plain text itinerary to HTML format."""

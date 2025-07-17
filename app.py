@@ -1,12 +1,116 @@
-import streamlit as st
 import os
+import streamlit as st
+from dotenv import load_dotenv
+from pathlib import Path
+from PIL import Image
+import google.generativeai as genai
 from utils.gemini_client import GeminiClient
-from utils.translator import Translator
 from utils.itinerary_generator import ItineraryGenerator
+
+# Load environment variables from .env file
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path)
+
+# Verify API key is loaded
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    st.error("Error: GEMINI_API_KEY not found in environment variables. Please check your .env file.")
+    st.stop()
+
+# Configure Gemini
+genai.configure(api_key=GEMINI_API_KEY)
+
+# UI Text Constants (in English, will be translated on the fly)
+UI_TEXT = {
+    "page_title": "Saanchari - Your Travel Companion",
+    "language_label": "Language",
+    "welcome_message": "🙏 Welcome to Saanchari! I'm your travel companion for exploring Andhra Pradesh. Ask me about places to visit, local culture, food recommendations, or say 'itinerary' or 'plan' to get a detailed travel plan!",
+    "quick_actions": ["🏛️ Famous Temples", "🏖️ Beach Destinations", "📋 Plan My Trip"],
+    "chat_placeholder": "Ask me anything about Andhra Pradesh tourism...",
+    "thinking": "Thinking...",
+    "error_message": "I apologize, but I'm having technical difficulties. Please try again.",
+    "temple_query": "Tell me about famous temples in Andhra Pradesh",
+    "beach_query": "Show me beautiful beach destinations in Andhra Pradesh",
+    "plan_query": "Help me plan a 3-day trip to Andhra Pradesh"
+}
+
+# Available languages
+LANGUAGES = ["English", "Hindi", "Telugu"]
+LANGUAGE_CODES = {
+    "English": "English",
+    "Hindi": "Hindi",
+    "Telugu": "Telugu"
+}
+
+# Initialize session state
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "language" not in st.session_state:
+    st.session_state.language = "English"
+
+# Initialize Gemini client
+gemini_client = GeminiClient()
+
+# Initialize Itinerary Generator
+itinerary_generator = ItineraryGenerator(gemini_client)
+
+# Function to translate text using Gemini API
+def translate_text(text, target_lang):
+    """Translate text using Gemini API"""
+    if not text or target_lang == "English":
+        return text
+        
+    try:
+        # Initialize Gemini with API key
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            st.error("GEMINI_API_KEY not found in environment variables")
+            return text
+            
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-pro')
+        
+        # Split long text into chunks to avoid token limits
+        max_chunk_length = 1000
+        if len(text) <= max_chunk_length:
+            chunks = [text]
+        else:
+            chunks = [text[i:i+max_chunk_length] for i in range(0, len(text), max_chunk_length)]
+            
+        translated_chunks = []
+        for chunk in chunks:
+            try:
+                prompt = f"Translate the following text to {target_lang}. Only return the translated text without any additional text or explanations. Here's the text to translate: \"{chunk}\""
+                response = model.generate_content(prompt)
+                if hasattr(response, 'text') and response.text:
+                    translated_chunks.append(response.text.strip())
+                else:
+                    translated_chunks.append(chunk)  # Fallback to original text if translation fails
+            except Exception as e:
+                st.warning(f"Error translating chunk: {str(e)}")
+                translated_chunks.append(chunk)  # Fallback to original text on error
+                
+        return " ".join(translated_chunks)
+        
+    except Exception as e:
+        st.warning(f"Translation failed: {str(e)}")
+        return text
+
+# Function to get translated text
+def get_text(key, target_lang=None):
+    """Get translated text for the given key in the target language."""
+    if not target_lang:
+        target_lang = st.session_state.language
+    
+    if target_lang == "English":
+        return UI_TEXT.get(key, key)
+    
+    text = UI_TEXT.get(key, key)
+    return translate_text(text, target_lang)
 
 # Page configuration
 st.set_page_config(
-    page_title="Saanchari - Your Travel Companion",
+    page_title=get_text("page_title"),
     page_icon="🗺️",
     layout="wide"
 )
@@ -181,35 +285,14 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-if "language" not in st.session_state:
-    st.session_state.language = "English"
-
-# Initialize clients
-@st.cache_resource
-def initialize_clients():
-    gemini_client = GeminiClient()
-    translator = Translator()
-    itinerary_generator = ItineraryGenerator(gemini_client)
-    return gemini_client, translator, itinerary_generator
-
-try:
-    gemini_client, translator, itinerary_generator = initialize_clients()
-except Exception as e:
-    st.error(f"Failed to initialize services: {str(e)}")
-    st.stop()
-
 # Header with logo and language selector
 col1, col2 = st.columns([3, 1])
 
 with col1:
     # Display logo image
     try:
-        from PIL import Image
         logo_image = Image.open("attached_assets/logo_1752680671368.png")
-        st.image(logo_image, width=300)
+        st.image(logo_image, width=200)
     except:
         st.markdown("""
         <div class="logo-container">
@@ -222,10 +305,10 @@ with col1:
 
 with col2:
     selected_language = st.selectbox(
-        "Language",
-        ["English", "Hindi", "Telugu"],
-        index=["English", "Hindi", "Telugu"].index(st.session_state.language),
-        key="language_selector"
+        get_text("language_label"),
+        LANGUAGES,
+        index=LANGUAGES.index(st.session_state.language) if st.session_state.language in LANGUAGES else 0,
+        label_visibility="collapsed"
     )
     if selected_language != st.session_state.language:
         st.session_state.language = selected_language
@@ -233,43 +316,32 @@ with col2:
 
 # Welcome message
 if not st.session_state.messages:
-    welcome_msg = {
-        "English": "🙏 Welcome to Saanchari! I'm your travel companion for exploring Andhra Pradesh. Ask me about places to visit, local culture, food recommendations, or say 'itinerary' or 'plan' to get a detailed travel plan!",
-        "Hindi": "🙏 सांचारी में आपका स्वागत है! मैं आंध्र प्रदेश की खोज के लिए आपका यात्रा साथी हूं। घूमने की जगहों, स्थानीय संस्कृति, खाने की सिफारिशों के बारे में पूछें, या विस्तृत यात्रा योजना के लिए 'यात्रा कार्यक्रम' या 'योजना' कहें!",
-        "Telugu": "🙏 సాంచారికి స్వాగతం! ఆంధ్ర ప్రదేశ్ అన్వేషణకు నేను మీ ప్రయాణ సహచరుడిని. సందర్శించవలసిన ప్రదేశాలు, స్థానిక సంస్కృతి, ఆహార సిఫార్సుల గురించి అడగండి, లేదా వివరణాత్మక ప్రయాణ ప్రణాళిక కోసం 'ప్రయాణ కార్యక్రమం' లేదా 'ప్రణాళిక' అని చెప్పండి!"
-    }
     st.session_state.messages.append({
         "role": "assistant",
-        "content": welcome_msg[st.session_state.language],
-        "original_content": welcome_msg["English"]
+        "content": get_text("welcome_message"),
+        "original_content": UI_TEXT["welcome_message"]
     })
 
 # Chat interface
-st.markdown("### Chat with Saanchari")
+#st.markdown("### Chat with Saanchari")
 
 # Quick action buttons
-quick_actions = {
-    "English": ["🏛️ Famous Temples", "🏖️ Beach Destinations", "📋 Plan My Trip"],
-    "Hindi": ["🏛️ प्रसिद्ध मंदिर", "🏖️ समुद्री तट", "📋 मेरी यात्रा की योजना"],
-    "Telugu": ["🏛️ ప్రసిద్ధ దేవాలయాలు", "🏖️ సముద్ర తీరాలు", "📋 నా ప్రయాణ ప్రణాళిక"]
-}
-
 col1, col2, col3 = st.columns(3)
 with col1:
-    if st.button(quick_actions[st.session_state.language][0], key="temples"):
-        user_input = "Tell me about famous temples in Andhra Pradesh"
+    if st.button(get_text("quick_actions")[0], key="temples"):
+        user_input = get_text("temple_query")
         st.session_state.messages.append({"role": "user", "content": user_input})
         st.rerun()
         
 with col2:
-    if st.button(quick_actions[st.session_state.language][1], key="beaches"):
-        user_input = "Show me beautiful beach destinations in Andhra Pradesh"
+    if st.button(get_text("quick_actions")[1], key="beaches"):
+        user_input = get_text("beach_query")
         st.session_state.messages.append({"role": "user", "content": user_input})
         st.rerun()
         
 with col3:
-    if st.button(quick_actions[st.session_state.language][2], key="plan"):
-        user_input = "Create a 3-day itinerary for Andhra Pradesh"
+    if st.button(get_text("quick_actions")[2], key="plan"):
+        user_input = get_text("plan_query")
         st.session_state.messages.append({"role": "user", "content": user_input})
         st.rerun()
 
@@ -294,8 +366,10 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
     should_process_response = True
     latest_user_message = st.session_state.messages[-1]["content"]
 
-# Chat input
-user_input = st.chat_input("Ask me anything about Andhra Pradesh tourism...")
+# Chat input container
+with st.container():
+    st.markdown("<div style='padding-bottom: 80px;'></div>", unsafe_allow_html=True)
+    user_input = st.chat_input(get_text("chat_placeholder"))
 
 if user_input:
     # Add user message
@@ -304,7 +378,7 @@ if user_input:
     latest_user_message = user_input
 
 if should_process_response and latest_user_message:
-    with st.spinner("Thinking..."):
+    with st.spinner(get_text("thinking")):
         try:
             # Check if user wants an itinerary
             keywords = ["itinerary", "plan", "trip", "schedule", "यात्रा कार्यक्रम", "योजना", "ప్రయాణ కార్యక్రమం", "ప్రణాళిక"]
@@ -315,7 +389,7 @@ if should_process_response and latest_user_message:
                 itinerary = itinerary_generator.generate_itinerary(latest_user_message, "English")
                 # Then translate if needed
                 if st.session_state.language != "English":
-                    itinerary = translator.translate_text(itinerary, "English", st.session_state.language)
+                    itinerary = translation_service.translate_text(itinerary, st.session_state.language)
                 
                 st.session_state.messages.append({
                     "role": "assistant",
@@ -324,11 +398,8 @@ if should_process_response and latest_user_message:
                     "original_content": itinerary
                 })
             else:
-                # Regular chat response in English first
-                response = gemini_client.get_tourism_response(latest_user_message, "English")
-                # Then translate if needed
-                if st.session_state.language != "English":
-                    response = translator.translate_text(response, "English", st.session_state.language)
+                # Get response in the target language
+                response = gemini_client.get_tourism_response(latest_user_message, st.session_state.language)
                 
                 st.session_state.messages.append({
                     "role": "assistant",
@@ -337,10 +408,10 @@ if should_process_response and latest_user_message:
                 })
                 
         except Exception as e:
-            error_msg = f"I apologize, but I'm having technical difficulties. Please try again. Error: {str(e)}"
+            error_msg = f"{get_text('error_message')} Error: {str(e)}"
             # Translate error message if needed
             if st.session_state.language != "English":
-                error_msg = translator.translate_text(error_msg, "English", st.session_state.language)
+                error_msg = translate_text(error_msg, st.session_state.language)
             
             st.session_state.messages.append({
                 "role": "assistant",
@@ -354,6 +425,6 @@ if should_process_response and latest_user_message:
 st.markdown("""
 <div style='position: fixed; bottom: 0; left: 0; right: 0; background-color: #FFFFFF; 
             border-top: 1px solid #CFD1D1; padding: 0.5rem; text-align: center; z-index: 999;'>
-    <small style='color: #07546B;'>Rocket Growth Technologies</small>
+    <small style='color: #07546B;'>Kshipani Tech Ventures Pvt Ltd.</small>
 </div>
 """, unsafe_allow_html=True)

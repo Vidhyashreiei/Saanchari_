@@ -20,43 +20,27 @@ A sophisticated tourism chatbot for Andhra Pradesh, built with Streamlit and pow
 
 ### Installation
 
-1. **Clone or download the project files**
-
-2. **Install required packages**:
+1. **Clone the repository**:
    ```bash
-   pip install streamlit google-genai deep-translator pillow
+   git clone https://github.com/your-username/saanchari-tourism.git
+   cd saanchari-tourism
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
    ```
 
 3. **Set up environment variables**:
-   ```bash
-   export GEMINI_API_KEY="your_gemini_api_key_here"
-   
+   Create a `.env` file in the project root and add:
+   ```
+   GEMINI_API_KEY=your_gemini_api_key_here
+   ```
+
 4. **Run the application**:
    ```bash
    streamlit run app.py
    ```
-
-## Deployment on Streamlit Cloud
-
-1. **Fork or upload this repository** to your GitHub account
-
-2. **Visit [Streamlit Cloud](https://streamlit.io/cloud)** and sign in with your GitHub account
-
-3. **Click "New app"** and select your repository
-
-4. **Configure the app**:
-   - Repository: `your-username/saanchari-chatbot`
-   - Branch: `main`
-   - Main file path: `app.py`
-
-5. **Add secrets**:
-   - In the Streamlit Cloud dashboard, go to "Settings" → "Secrets"
-   - Add your environment variables:
-     ```toml
-     GEMINI_API_KEY = "your_gemini_api_key_here"
-     ```
-
-6. **Deploy**: Click "Deploy" and your app will be available at `https://your-app-name.streamlit.app`
 
 ## Key Features
 
@@ -72,3 +56,9 @@ A sophisticated tourism chatbot for Andhra Pradesh, built with Streamlit and pow
 - Try phrases like "Plan a 5-day trip to Andhra Pradesh" for detailed itineraries
 - Switch languages anytime using the dropdown in the top right
 - Clear chat history using the button below the chat interface
+
+## Development Notes
+
+### Translation Implementation
+
+Initially, we experimented with using the `googletrans` and `deep-translator` packages for language translation. However, we encountered compatibility issues with other dependencies in the project. After several iterations, we decided to leverage the Gemini API for all translations, which provided better stability and simplified our dependency management. This approach ensures consistent behavior across different environments and eliminates potential conflicts with other packages.
