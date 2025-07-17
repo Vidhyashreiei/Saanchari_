@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Update pip
+python -m pip install --upgrade pip
+
 # Install required packages
 pip install -r requirements.txt
 
@@ -19,5 +22,7 @@ serverAddress = "0.0.0.0"
 serverPort = 8501
 EOL
 
-# Set execute permissions
-chmod +x setup.sh
+# Verify installations
+echo "Verifying installations..."
+python -c "import streamlit as st; print(f'Streamlit version: {st.__version__}')"
+python -c "from PIL import Image; print(f'Pillow version: {Image.__version__}')"
