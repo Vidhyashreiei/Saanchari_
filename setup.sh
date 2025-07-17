@@ -3,6 +3,9 @@
 # Update pip
 python -m pip install --upgrade pip
 
+# Install specific version of setuptools
+pip install setuptools==65.5.0
+
 # Install required packages
 pip install -r requirements.txt
 
@@ -23,6 +26,9 @@ serverPort = 8501
 EOL
 
 # Verify installations
-echo "Verifying installations..."
-python -c "import streamlit as st; print(f'Streamlit version: {st.__version__}')"
-python -c "from PIL import Image; print(f'Pillow version: {Image.__version__}')"
+echo "=== Verifying installations ==="
+python --version
+pip list | grep -E "streamlit|pillow|google-generativeai"
+
+echo "=== Starting Streamlit server ==="
+streamlit run app.py --server.port=8501 --server.address=0.0.0.0
